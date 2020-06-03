@@ -8,7 +8,7 @@ import java.time.Duration;
  * The landing should take 17 minutes
  *  Z axis is front of space craft, plus is slowing down 1m/s^2
  */
-public class working_real_p {
+public class NOT_working_real_p {
 	public static final double WEIGHT_EMP = 164; // kg
 	public static final double WEIGHT_FULL = 585; // kg// 585
 
@@ -56,11 +56,11 @@ public class working_real_p {
 
 		double limit =45;
 
-		PidController vVelocityPid = new PidController(4.31715,0.01,0.1,400,-400);
+		PidController vVelocityPid = new PidController(2,0.01,0.1,400,-400);
 		vVelocityPid.SetPoint = 0;
 		vVelocityPid.setProcessVariable(vs);
 
-		PidController hVelocityPid = new PidController(1,0.01,0.1,1699,-1699);
+		PidController hVelocityPid = new PidController(5,0.01,0.1,1699,-1699);
 		hVelocityPid.SetPoint = 0;
 		hVelocityPid.setProcessVariable(hs);
 
@@ -84,43 +84,6 @@ public class working_real_p {
 			vs -= v_acc*dt;
 			alt -= dt*vs;
 
-			prevVacc = v_acc;
-
-			// start landing pid move hs and vs to 0
-//			if(hs < 30) {
-//				ang -= 2.45;
-//				NN = 0.71;
-//			}
-//			if(alt < 200){
-//				NN = 0.745;
-//			}
-
-			// start landing pid, move hs to 0
-//			if(hs  > 50){
-//				ang += anglePid(prevVacc,v_acc);
-//				prevVacc = v_acc;
-//
-//			}
-//			if(hs < 50 ) {
-//				ang -= 2;
-//				NN -= 0.01;
-////				if(hs < 2.5){  // start vs pid move it to ms
-////					//ang += speedPid(prevVacc,vs);
-////					//NN += powerPid(prevVsSpeed,vs,1);
-////					ang = 0;
-////					NN = 0.463;
-////
-////				}
-////				else{ // activate hs pid until it reaches 2.5ms
-////					ang += speedPid(prevHsSpeed,hs);
-////					NN += powerPid(prevHsSpeed,hs,1);
-////
-////				}
-//			}
-			prevVacc = v_acc;
-			prevVsSpeed = vs;
-			prevHsSpeed = hs;
-
 
 			vVelocityPid.setProcessVariable(vs);
 			double vVelocityResult  = vVelocityPid.ControlVariable(Duration.ofSeconds(1));
@@ -142,11 +105,6 @@ public class working_real_p {
 				alt=0;
 				System.out.println("No Fuels");
 			}
-
-//			System.out.println("time: "+df2.format(time)+", vs: "+df2.format(vs)+", " +
-//					"hs: "+df2.format(hs)+", alt: "+df2.format(alt)+",ang: "+df2.format(ang)+", " +
-//					"weight: "+df2.format(weight)+", acc: "+df2.format(acc)+" v_acc: "+df2.format(v_acc)+" h_acc: "+df2.format(h_acc)+ " fuel: "+df2.format(fuel) +
-//					",moonvacc: " + df2.format(vacc) + " ,NN: " +df2.format(NN));
 
 			System.out.println("ang: "+df2.format(ang)+",   PidV: " + df2.format(vVelocityResult) + ",    PidH: " +df2.format(hVelocityResult)+ ",  " +
 					"  vs: " +df2.format(vs)+ ",    " + "hs: " +df2.format(hs)+ ",    alt: " +df2.format(alt)+ ",  " +

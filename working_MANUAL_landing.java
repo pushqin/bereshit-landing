@@ -1,13 +1,12 @@
 
 import java.text.DecimalFormat;
-
 /**
  * This class represents the basic flight controller of the Bereshit space craft.
  * @author ben-moshe
  * The landing should take 17 minutes
  *  Z axis is front of space craft, plus is slowing down 1m/s^2
  */
-public class working_pid_vertical_acc {
+public class working_MANUAL_landing {
 	public static final double WEIGHT_EMP = 164; // kg
 	public static final double WEIGHT_FULL = 585; // kg// 585
 
@@ -43,18 +42,21 @@ public class working_pid_vertical_acc {
 		double time = 0;
 
 		double dt = 1; // sec
-		double acc = 1.663; // Acceleration rate (m/s^2)
+		double acc = 0; // Acceleration rate (m/s^2)
 		double fuel = 215.06; //
 		double weight = WEIGHT_EMP + fuel;
 		System.out.println("time, vs, hs, alt, ang,weight,acc");
 		double NN = 1; // rate[0,1] // percentage of engine streights
-		DecimalFormat df2 = new DecimalFormat("#.###");
-		double prevVacc = 0;
-
+		DecimalFormat df2 = new DecimalFormat("#.##");
+		double hsAndVs = vs+hs;
+		double prevHsAndVs = hsAndVs;
 		double limit =45;
 		// ** main simulation loop ***
 		while(alt>0) {
 
+			if(alt<5) { // no need to stop
+				NN=0.4;
+			}
 			// main computations
 			double ang_rad = Math.toRadians(ang);
 			double h_acc = Math.sin(ang_rad)*acc;
@@ -66,35 +68,32 @@ public class working_pid_vertical_acc {
 			fuel -= dw;
 			weight = WEIGHT_EMP + fuel;
 			acc = NN* accMax(weight);
+			//acc = NN * 2;
+
 			v_acc -= vacc;
-			hs -= h_acc*dt;
+			if(hs>0) {
+				hs -= h_acc*dt;
+
+			}
+			//dist -= hs*dt;
 			vs -= v_acc*dt;
+
 			alt -= dt*vs;
 
-			ang += anglePid(prevVacc,v_acc);
-			prevVacc = v_acc;
-
-			// start landing pid move hs and vs to 0
-//			if(hs < 50 ){
-//				ang-=1.5;
-//				NN=0.7;
-//			}
-			if(hs < 30){
-				ang -= 2.45;
-				NN = 0.71;
+			if(v_acc < 0.01){
+				ang -= 0.1;
+			}
+			else if(v_acc > 0.01){
+				ang += 0.1;
+			}
+			if(hs < 50){
+				ang -= 1.28;
+				NN = 0.7;
 			}
 
-//			if(hs < 2.5){
-//				ang -= 2;
-//			}
-
-			if(alt < 200){
-				NN = 0.745;
-			}
 
 			ang = setAngle(ang);
 			NN = setEnginePower(NN);
-
 			if(fuel < 0){
 				alt=0;
 				System.out.println("No Fuels");
@@ -107,14 +106,6 @@ public class working_pid_vertical_acc {
 		}
 
 
-	}
-
-	public static double anglePid(double prevVerticalAcc,double currentVerticalAcc){
-		// TODO: add prevVerticalAcc to accuation
-		double angleChange = 0.1;
-		double desiredVerticalAcc = 0.01;
-		double  deltaDesiredCurrent = desiredVerticalAcc/currentVerticalAcc;
-		return angleChange * (1-deltaDesiredCurrent) ;
 	}
 
 	public static double setAngle(double angle){
